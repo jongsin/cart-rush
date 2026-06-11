@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>CART RUSH! 🛒 마트 카트 레이스</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%92%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- ──────── 홈 화면 ──────── -->
+  <div id="screen-home" class="screen active">
+    <div class="lang-toggle">
+      <button class="lang-btn" data-lang="ko">한국어</button>
+      <button class="lang-btn" data-lang="en">English</button>
+    </div>
+    <div class="home-card">
+      <div class="logo">
+        <div class="logo-cart">🛒</div>
+        <h1>CART RUSH!</h1>
+        <p class="tagline" data-i18n="tagline">마트 카트 레이스 · 최대 4인 멀티플레이</p>
+      </div>
+
+      <label class="field-label" for="input-name" data-i18n="nicknameLabel">닉네임</label>
+      <input id="input-name" maxlength="10" placeholder="닉네임 (10자 이내)" data-i18n-ph="nicknamePh" autocomplete="off" />
+
+      <button id="btn-create" class="btn btn-primary" data-i18n="createBtn">🏁 새 방 만들기</button>
+
+      <div class="divider"><span data-i18n="or">또는</span></div>
+
+      <div class="join-row">
+        <input id="input-code" maxlength="4" placeholder="방 코드" data-i18n-ph="codePh" autocomplete="off" />
+        <button id="btn-join" class="btn btn-secondary" data-i18n="joinBtn">참가</button>
+      </div>
+
+      <div class="how-to">
+        <h3 data-i18n="howtoTitle">🎮 게임 방법</h3>
+        <ul>
+          <li data-i18n="howto1" data-i18n-html>🛒 카트는 자동으로 앞으로! <b>← →</b> 로 좌우 이동</li>
+          <li data-i18n="howto2" data-i18n-html>🧾 쇼핑 리스트의 상품만 골라 담기 (다른 건 담으면 느려져요!)</li>
+          <li data-i18n="howto3" data-i18n-html>🚶 쇼핑객과 부딪히면 잠시 스턴!</li>
+          <li data-i18n="howto4" data-i18n-html>⚡ <b>Shift / ↑</b> 부스트, <b>↓</b> 브레이크</li>
+          <li data-i18n="howto5" data-i18n-html>🏁 리스트를 다 채우고 가장 먼저 계산대 통과하면 승리!</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────── 로비 화면 ──────── -->
+  <div id="screen-lobby" class="screen">
+    <div class="lobby-card">
+      <p class="lobby-sub" data-i18n="lobbySub">친구에게 코드를 알려주세요!</p>
+      <div class="room-code-box">
+        <span id="lobby-code">----</span>
+        <button id="btn-copy" class="btn-mini" title="복사">📋</button>
+      </div>
+      <div id="lobby-level" class="lobby-level">LEVEL 1</div>
+      <div id="lobby-players" class="player-grid"></div>
+      <button id="btn-start" class="btn btn-primary" data-i18n="startBtn">🏁 게임 시작!</button>
+      <p id="lobby-wait" class="lobby-wait hidden" data-i18n="lobbyWait">호스트가 시작하길 기다리는 중...</p>
+      <button id="btn-leave" class="btn btn-ghost" data-i18n="leave">나가기</button>
+    </div>
+  </div>
+
+  <!-- ──────── 게임 화면 ──────── -->
+  <div id="screen-game" class="screen">
+    <canvas id="canvas"></canvas>
+
+    <div id="hud">
+      <div id="hud-top">
+        <span id="hud-level" class="hud-chip">LV 1</span>
+        <span id="hud-timer" class="hud-chip">0:00</span>
+        <span id="hud-lap" class="hud-chip">1바퀴</span>
+        <button id="btn-sound" class="hud-chip sound-btn" title="M">🔊</button>
+      </div>
+
+      <div id="shopping-list" class="hud-panel">
+        <h3 data-i18n="shoppingList">🧾 쇼핑 리스트</h3>
+        <ul id="list-items"></ul>
+        <div id="list-done-msg" class="hidden">✅</div>
+      </div>
+
+      <div id="standings" class="hud-panel">
+        <h3 data-i18n="standingsTitle">🏆 순위</h3>
+        <ul id="standings-items"></ul>
+      </div>
+
+      <div id="hud-bottom">
+        <div id="boost-wrap">
+          <span>⚡</span>
+          <div id="boost-bar"><div id="boost-fill"></div></div>
+        </div>
+        <div id="key-hints" data-i18n="keyHints">← → 이동 · Shift/↑ 부스트 · ↓ 브레이크</div>
+      </div>
+
+      <!-- 터치 컨트롤 (터치 기기에서만 표시) -->
+      <div id="touch-controls">
+        <div class="tc-group">
+          <button class="tbtn" data-key="ArrowLeft" aria-label="left">◀</button>
+          <button class="tbtn" data-key="ArrowRight" aria-label="right">▶</button>
+        </div>
+        <div class="tc-group">
+          <button class="tbtn" data-key="ArrowDown" aria-label="brake">🛑</button>
+          <button class="tbtn tbtn-boost" data-key="ShiftLeft" aria-label="boost">⚡</button>
+        </div>
+      </div>
+
+      <div id="toast-area"></div>
+      <div id="countdown" class="hidden"></div>
+    </div>
+
+    <!-- 결과 오버레이 -->
+    <div id="results-overlay" class="overlay hidden">
+      <div class="results-card">
+        <h2 id="results-title">🏁 레이스 결과</h2>
+        <div id="results-my-place"></div>
+        <table id="results-table">
+          <thead><tr><th></th><th data-i18n="thPlayer">플레이어</th><th data-i18n="thTime">기록</th><th data-i18n="thItems">담은 상품</th></tr></thead>
+          <tbody id="results-body"></tbody>
+        </table>
+        <div class="results-actions">
+          <button id="btn-next" class="btn btn-primary">다음 레벨 ▶</button>
+          <p id="results-wait" class="hidden" data-i18n="resultsWait">호스트가 다음 레벨을 시작하길 기다리는 중...</p>
+          <button id="btn-results-leave" class="btn btn-ghost" data-i18n="leave">나가기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 연결 끊김 오버레이 -->
+    <div id="disconnect-overlay" class="overlay hidden">
+      <div class="results-card">
+        <h2 data-i18n="disconnectTitle">😢 연결이 끊겼어요</h2>
+        <p style="margin:12px 0 20px" data-i18n="disconnectBody">서버와의 연결이 끊어졌어요. 새로고침 해주세요!</p>
+        <button class="btn btn-primary" onclick="location.reload()" data-i18n="refresh">새로고침</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "cart-rush",
+  "version": "1.0.0",
+  "description": "마트 카트 레이스 - 최대 4인 멀티플레이 쇼핑카트 레이싱 게임",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

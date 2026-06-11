@@ -1,0 +1,16 @@
+# CART RUSH — docker compose up -d 한 방이면 끝!
+# 호스트 포트를 바꾸고 싶으면: HOST_PORT=8080 docker compose up -d
+services:
+  cart-rush:
+    build: .
+    image: cart-rush
+    container_name: cart-rush
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
