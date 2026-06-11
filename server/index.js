@@ -18,7 +18,10 @@ const rawBase = (process.env.BASE_PATH || '').trim().replace(/^\/+|\/+$/g, '');
 const BASE_PATH = rawBase ? `/${rawBase}` : '';
 
 const app = express();
-const pub = express.static(path.join(__dirname, '..', 'public'));
+// no-cache = 매번 ETag로 재검증(변경 없으면 304라 빠름) — 폰이 옛 CSS/JS를 캐시로 들고 버티는 것 방지
+const pub = express.static(path.join(__dirname, '..', 'public'), {
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache')
+});
 app.use(pub);
 if (BASE_PATH) app.use(BASE_PATH, pub);
 
