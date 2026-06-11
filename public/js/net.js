@@ -9,7 +9,9 @@ export class Net {
   connect() {
     return new Promise((resolve, reject) => {
       const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-      const ws = new WebSocket(`${proto}://${location.host}`);
+      // 서브패스 배포(예: /cart-rush/) 대응 — 페이지가 있는 디렉터리로 접속
+      const base = location.pathname.replace(/\/[^/]*$/, '');
+      const ws = new WebSocket(`${proto}://${location.host}${base}/`);
       ws.onopen = () => resolve();
       ws.onerror = () => reject(new Error('서버에 연결할 수 없어요'));
       ws.onmessage = (ev) => {

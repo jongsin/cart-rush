@@ -7,6 +7,9 @@ services:
     container_name: cart-rush
     ports:
       - "${HOST_PORT:-3000}:3000"
+    environment:
+      # 프록시가 프리픽스를 안 떼주는 경우에만: BASE_PATH=/cart-rush docker compose up -d
+      BASE_PATH: ${BASE_PATH:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]

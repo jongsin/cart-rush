@@ -30,6 +30,37 @@ docker compose down           # 종료
 - 컨테이너 로그에 찍히는 `Network:` 주소는 **컨테이너 내부 IP**라 친구가 접속할 수 없어요 — 같은 네트워크의 친구는 **호스트 머신의 IP**(`http://<내 컴퓨터 IP>:3000`)로 접속하면 됩니다.
 - 클라우드/NAS에 올릴 때도 이 compose 파일 그대로 동작해요 (헬스체크 포함).
 
+## 🌐 서브패스 배포 (예: `https://games.example.com/cart-rush`)
+
+클라이언트는 페이지 경로를 기준으로 WebSocket에 접속하므로 서브패스 배포를 그대로 지원해요.
+서버(예: nginx)에서 프리픽스를 제거해 컨테이너로 넘기는 구성을 권장:
+
+```nginx
+# games.example.com 의 server 블록 안에
+location = /cart-rush { return 301 /cart-rush/; }
+location /cart-rush/ {
+    proxy_pass http://127.0.0.1:3000/;   # 끝 슬래시 = /cart-rush/ 프리픽스 제거
+    proxy_http_version 1.1;              # ↓ WebSocket 업그레이드에 필수
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_read_timeout 1h;               # 게임 중 WS가 끊기지 않게
+}
+```
+
+[Caddy](https://caddyserver.com)라면 TLS 인증서까지 자동이라 더 간단해요:
+
+```
+games.example.com {
+    handle_path /cart-rush/* {
+        reverse_proxy 127.0.0.1:3000
+    }
+}
+```
+
+- 프록시가 프리픽스를 **제거하지 못하는** 환경이면 컨테이너에 `BASE_PATH=/cart-rush`를 주면 됩니다: `BASE_PATH=/cart-rush docker compose up -d`
+- HTTPS로 서빙하면 클라이언트가 자동으로 `wss://`를 사용해요 (코드 수정 불필요).
+
 ## 📱 모바일로 참가하기
 
 1. PC에서 서버를 켜고(`npm start`), 폰을 **같은 Wi-Fi**에 연결

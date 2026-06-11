@@ -12,8 +12,15 @@ const PORT = process.env.PORT || 3000;
 const MAX_PLAYERS = 4;
 const COLORS = ['#ff5a5f', '#3a86ff', '#2ec27e', '#ffb703'];
 
+// 서브패스 배포 옵션: BASE_PATH=/cart-rush 처럼 주면 그 경로에서도 서빙
+// (리버스 프록시가 프리픽스를 제거해 주면 설정할 필요 없음)
+const rawBase = (process.env.BASE_PATH || '').trim().replace(/^\/+|\/+$/g, '');
+const BASE_PATH = rawBase ? `/${rawBase}` : '';
+
 const app = express();
-app.use(express.static(path.join(__dirname, '..', 'public')));
+const pub = express.static(path.join(__dirname, '..', 'public'));
+app.use(pub);
+if (BASE_PATH) app.use(BASE_PATH, pub);
 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
@@ -282,7 +289,8 @@ wss.on('close', () => clearInterval(pingTimer));
 
 server.listen(PORT, () => {
   console.log('\n🛒 CART RUSH — 마트 카트 레이스 서버 시작!');
-  console.log(`   Local:   http://localhost:${PORT}`);
+  console.log(`   Local:   http://localhost:${PORT}${BASE_PATH}`);
+  if (BASE_PATH) console.log(`   BASE_PATH: ${BASE_PATH} (서브패스 모드)`);
   for (const ifaces of Object.values(os.networkInterfaces())) {
     for (const i of ifaces || []) {
       if (i.family === 'IPv4' && !i.internal) console.log(`   Network: http://${i.address}:${PORT}  ← 친구는 이 주소로!`);
