@@ -185,6 +185,17 @@ function updateResultsButtons() {
   $('results-wait').classList.toggle('hidden', isHost);
 }
 
+// ───────── 레이아웃 자가 테스트 (#autotest) ─────────
+// 실기기/시뮬레이터에서 버튼 잘림을 빠르게 확인하는 용도: 접속하자마자 혼자 방을 만들어 바로 시작
+if (location.hash === '#autotest') {
+  (async () => {
+    if (!(await ensureConnected())) return;
+    const onJoin = net.handlers.get('roomJoined');
+    net.on('roomJoined', (m) => { onJoin(m); setTimeout(() => net.send('start'), 400); });
+    net.send('create', { name: 'TEST' });
+  })();
+}
+
 function showResults(m) {
   const mine = m.results.find((r) => r.id === myId);
   const medals = ['🥇', '🥈', '🥉', '4️⃣'];

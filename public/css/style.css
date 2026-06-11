@@ -58,6 +58,7 @@ h1, h2, h3, b, strong, th { font-weight: normal; }
     radial-gradient(circle at 20% 85%, #ddf3d3 0 9%, transparent 10%),
     var(--cream);
   overflow-y: auto;
+  padding: 24px 0;
 }
 
 .home-card {
@@ -66,7 +67,8 @@ h1, h2, h3, b, strong, th { font-weight: normal; }
   box-shadow: var(--shadow);
   padding: 36px 40px;
   width: min(440px, 92vw);
-  margin: 24px 0;
+  /* margin: auto = 화면보다 카드가 길어도 위가 잘리지 않고 스크롤 가능 (flex 센터링의 위쪽 클리핑 회피) */
+  margin: auto;
 }
 
 .logo { text-align: center; margin-bottom: 24px; }
@@ -140,7 +142,7 @@ input:focus { border-color: var(--orange); }
 .how-to b { color: var(--orange-dark); }
 
 /* ───────── 로비 ───────── */
-#screen-lobby { background: var(--cream); }
+#screen-lobby { background: var(--cream); overflow-y: auto; padding: 24px 0; }
 .lobby-card {
   background: var(--card);
   border-radius: 24px;
@@ -148,6 +150,7 @@ input:focus { border-color: var(--orange); }
   padding: 36px 40px;
   width: min(480px, 92vw);
   text-align: center;
+  margin: auto; /* 위쪽 클리핑 회피 */
 }
 .lobby-sub { color: #9a8c80; font-size: 14px; }
 .room-code-box {
@@ -317,11 +320,14 @@ body.touch #hud-bottom { bottom: calc(106px + env(safe-area-inset-bottom, 0px));
   background: rgba(30, 24, 20, 0.75);
   display: flex; align-items: center; justify-content: center;
   backdrop-filter: blur(3px);
+  overflow-y: auto;
+  padding: 18px 0;
 }
 .results-card {
   background: var(--card); border-radius: 24px;
   padding: 32px 36px; width: min(520px, 92vw);
   text-align: center; box-shadow: var(--shadow);
+  margin: auto; /* 카드가 화면보다 길어도 제목부터 보이고 스크롤 가능 */
 }
 .results-card h2 { color: var(--orange-dark); margin-bottom: 6px; font-size: 26px; }
 #results-my-place { font-family: var(--font-display); font-size: 46px; margin: 8px 0 16px; }
