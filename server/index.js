@@ -6,7 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { WebSocketServer } from 'ws';
 import { generateMap } from './mapgen.js';
-import { portalEnabled, verifyMember, submitScore, raceScore } from './portal.js';
+import { portalEnabled, portalSlug, verifyMember, submitScore, raceScore } from './portal.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -141,7 +141,8 @@ function endGame(room, reason) {
       avatarUrl: p.portal ? p.portal.avatarUrl : null
     };
   });
-  broadcast(room, 'gameEnd', { results, level: room.level, reason });
+  // portalSlug: 포털 연동 시 클라이언트가 결과 화면에서 리더보드로 이동할 수 있게
+  broadcast(room, 'gameEnd', { results, level: room.level, reason, portalSlug });
   room.level++;
   console.log(`[room ${room.code}] game end (${reason}), next level ${room.level}`);
 }

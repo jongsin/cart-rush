@@ -59,7 +59,8 @@ const DICT = {
     needCode: '4글자 방 코드를 입력해주세요!',
     lostConn: '서버와의 연결이 끊겼어요 😢',
     portalLinked: (n) => `🟢 포털 로그인: ${n}`,
-    portalScore: (s) => `🏆 포털 점수 +${s}점 저장!`
+    portalScore: (s) => `🏆 포털 점수 +${s}점 저장!`,
+    leaderboardBtn: '🏆 리더보드 보기'
   },
   en: {
     title: 'CART RUSH! 🛒 Supermarket Cart Race',
@@ -118,7 +119,8 @@ const DICT = {
     needCode: 'Enter the 4-letter room code!',
     lostConn: 'Lost connection to the server 😢',
     portalLinked: (n) => `🟢 Portal login: ${n}`,
-    portalScore: (s) => `🏆 +${s} pts saved to portal!`
+    portalScore: (s) => `🏆 +${s} pts saved to portal!`,
+    leaderboardBtn: '🏆 View Leaderboard'
   }
 };
 

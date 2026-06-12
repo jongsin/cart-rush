@@ -31,6 +31,7 @@ let hostId = null;
 let roomCode = null;
 let playerList = [];
 let nextLevel = 1;
+let portalSlug = null; // 포털 연동 시 서버가 gameEnd 에 실어주는 게임 슬러그
 
 // ───────── 화면 전환 ─────────
 function showScreen(name) {
@@ -153,6 +154,13 @@ $('btn-leave').addEventListener('click', () => { net.send('leave'); location.rel
 $('btn-results-leave').addEventListener('click', () => { net.send('leave'); location.reload(); });
 $('btn-next').addEventListener('click', () => net.send('start'));
 
+// 포털 리더보드로 이동 — 포털 exit 페이지(전면광고)를 거쳐 랭킹 화면으로
+$('btn-results-board').addEventListener('click', () => {
+  if (!portalSlug) return;
+  net.send('leave');
+  location.href = `/games/${encodeURIComponent(portalSlug)}/exit?to=ranking`;
+});
+
 // ───────── 네트워크 이벤트 ─────────
 net.on('roomJoined', (m) => {
   myId = m.you;
@@ -195,6 +203,7 @@ net.on('finished', (m) => game.onFinished(m));
 
 net.on('gameEnd', (m) => {
   nextLevel = m.level + 1;
+  portalSlug = m.portalSlug ?? null;
   game.end();
   showResults(m);
 });
@@ -276,6 +285,8 @@ function showResults(m) {
   }
 
   $('btn-next').textContent = t('nextLevel', nextLevel);
+  // 포털로 서빙 중일 때만 리더보드 버튼 노출 (독립 실행 모드에선 포털 페이지가 없음)
+  $('btn-results-board').classList.toggle('hidden', !portalSlug);
   updateResultsButtons();
   $('results-overlay').classList.remove('hidden');
 }

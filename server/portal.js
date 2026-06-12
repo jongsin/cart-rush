@@ -15,6 +15,10 @@ const TIMEOUT_MS = 3000; // 포털 응답 지연이 게임 입장을 오래 막�
 
 export const portalEnabled = Boolean(BASE && KEY);
 
+// 클라이언트가 포털 페이지(리더보드 등)로 이동할 때 쓰는 슬러그.
+// 포털 연동이 켜진 경우 = 포털 도메인 서브패스로 서빙되는 경우에만 내려준다.
+export const portalSlug = portalEnabled ? SLUG : null;
+
 async function api(path, body) {
   const res = await fetch(`${BASE}/api/ext/v1/games/${SLUG}${path}`, {
     method: 'POST',
