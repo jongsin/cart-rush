@@ -45,6 +45,8 @@
 
       <label class="field-label" for="input-name" data-i18n="nicknameLabel">닉네임</label>
       <input id="input-name" maxlength="10" placeholder="닉네임 (10자 이내)" data-i18n-ph="nicknamePh" autocomplete="off" />
+      <!-- 포털 로그인 상태로 접속하면 서버가 portalProfile 을 보내 표시됨 -->
+      <div id="portal-badge" class="portal-badge hidden"></div>
 
       <button id="btn-create" class="btn btn-primary" data-i18n="createBtn">🏁 새 방 만들기</button>
 
@@ -136,6 +138,7 @@
       <div class="results-card">
         <h2 id="results-title">🏁 레이스 결과</h2>
         <div id="results-my-place"></div>
+        <div id="results-my-score" class="results-score hidden"></div>
         <table id="results-table">
           <thead><tr><th></th><th data-i18n="thPlayer">플레이어</th><th data-i18n="thTime">기록</th><th data-i18n="thItems">담은 상품</th></tr></thead>
           <tbody id="results-body"></tbody>

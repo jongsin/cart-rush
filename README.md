@@ -61,6 +61,24 @@ games.example.com {
 - 프록시가 프리픽스를 **제거하지 못하는** 환경이면 컨테이너에 `BASE_PATH=/cart-rush`를 주면 됩니다: `BASE_PATH=/cart-rush docker compose up -d`
 - HTTPS로 서빙하면 클라이언트가 자동으로 `wss://`를 사용해요 (코드 수정 불필요).
 
+## 🎮 게임 포털 연동 (선택)
+
+YoonIT 게임 포털(games.hometown.co.kr)과 **같은 도메인의 서브패스**(`/cart-rush/`)로 서빙하면
+포털 로그인 회원의 닉네임·아바타를 게임에서 쓰고, 완주 점수를 포털 리더보드에 자동 제출해요.
+
+```bash
+PORTAL_API_BASE=https://games.hometown.co.kr \
+PORTAL_API_KEY=<포털 BO에서 발급한 API 키> \
+BASE_PATH=/cart-rush \
+docker compose up -d --build
+```
+
+- 두 변수를 안 주면 기존 그대로 **독립 실행 모드**(게스트 전용)로 동작해요.
+- 동작 원리: 같은 도메인이라 WebSocket 접속에 포털 로그인 쿠키가 실려오고, 서버가 포털
+  verify API로 회원을 확인해요. 비로그인 사용자는 그냥 게스트로 플레이.
+- 점수 공식(완주자만): `레벨×10000 + 순위 보너스(3000/2400/1800/1200) + 시간 보너스(최대 3000)`
+  — 상위 레벨 완주가 항상 우선이고, 같은 레벨에선 순위·기록 순.
+
 ## 📱 모바일로 참가하기
 
 1. PC에서 서버를 켜고(`npm start`), 폰을 **같은 Wi-Fi**에 연결

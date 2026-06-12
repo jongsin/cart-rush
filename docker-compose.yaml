@@ -10,6 +10,12 @@ services:
     environment:
       # 프록시가 프리픽스를 안 떼주는 경우에만: BASE_PATH=/cart-rush docker compose up -d
       BASE_PATH: ${BASE_PATH:-}
+      # 게임 포털 연동 (둘 다 설정해야 활성화 — 미설정 시 독립 실행 모드)
+      #   PORTAL_API_BASE: https://games.hometown.co.kr
+      #   PORTAL_API_KEY : 포털 BO > 게임 관리 > API 키 발급 값
+      PORTAL_API_BASE: ${PORTAL_API_BASE:-}
+      PORTAL_API_KEY: ${PORTAL_API_KEY:-}
+      PORTAL_GAME_SLUG: ${PORTAL_GAME_SLUG:-cart-rush}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]

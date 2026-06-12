@@ -57,7 +57,9 @@ const DICT = {
     IN_PROGRESS: '게임이 진행 중이에요. 끝나면 들어올 수 있어요!',
     connectFail: '서버에 연결할 수 없어요! 서버가 켜져 있는지 확인해주세요.',
     needCode: '4글자 방 코드를 입력해주세요!',
-    lostConn: '서버와의 연결이 끊겼어요 😢'
+    lostConn: '서버와의 연결이 끊겼어요 😢',
+    portalLinked: (n) => `🟢 포털 로그인: ${n}`,
+    portalScore: (s) => `🏆 포털 점수 +${s}점 저장!`
   },
   en: {
     title: 'CART RUSH! 🛒 Supermarket Cart Race',
@@ -114,7 +116,9 @@ const DICT = {
     IN_PROGRESS: 'Game in progress — join when it ends!',
     connectFail: "Can't reach the server! Make sure it's running.",
     needCode: 'Enter the 4-letter room code!',
-    lostConn: 'Lost connection to the server 😢'
+    lostConn: 'Lost connection to the server 😢',
+    portalLinked: (n) => `🟢 Portal login: ${n}`,
+    portalScore: (s) => `🏆 +${s} pts saved to portal!`
   }
 };
 

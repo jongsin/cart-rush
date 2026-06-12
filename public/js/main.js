@@ -9,7 +9,7 @@ const $ = (id) => document.getElementById(id);
 // 언어 적용 + 토글
 i18n.applyStatic();
 for (const b of document.querySelectorAll('.lang-btn')) {
-  b.addEventListener('click', () => i18n.set(b.dataset.lang));
+  b.addEventListener('click', () => { i18n.set(b.dataset.lang); refreshPortalBadge(); });
 }
 
 const net = new Net();
@@ -42,7 +42,30 @@ function showScreen(name) {
 const nameInput = $('input-name');
 nameInput.value = localStorage.getItem('cartrush-name') || '';
 
+// ───────── 포털 연동 ─────────
+// 포털 서브패스(/cart-rush/)로 서빙되면 WS 연결에 포털 로그인 쿠키가 실려가고,
+// 서버가 회원 확인 후 portalProfile 을 보내준다. (게스트면 아무 일도 없음)
+let portalProfile = null;
+
+function refreshPortalBadge() {
+  if (!portalProfile) return;
+  const badge = $('portal-badge');
+  badge.textContent = t('portalLinked', portalProfile.nickname);
+  badge.classList.remove('hidden');
+}
+
+net.on('portalProfile', (m) => {
+  portalProfile = m;
+  nameInput.value = m.nickname; // 서버가 어차피 포털 닉네임으로 강제하므로 입력도 잠근다
+  nameInput.disabled = true;
+  refreshPortalBadge();
+});
+
+// 미리 연결해 두면 방 만들기/참가 전에 프로필이 도착한다. 실패는 무시(클릭 시 재시도)
+net.connect().catch(() => {});
+
 function myName() {
+  if (portalProfile) return portalProfile.nickname;
   const n = nameInput.value.trim().slice(0, 10) || `${t('guest')}${Math.floor(Math.random() * 99) + 1}`;
   localStorage.setItem('cartrush-name', n);
   return n;
@@ -91,7 +114,15 @@ function renderLobby() {
       const nm = document.createElement('span');
       nm.className = 'pname';
       nm.textContent = p.name + (p.id === myId ? t('me') : '');
-      chip.append(dot, nm);
+      chip.append(dot);
+      if (p.avatarUrl) {
+        const av = document.createElement('img');
+        av.className = 'pavatar';
+        av.src = p.avatarUrl;
+        av.alt = '';
+        chip.append(av);
+      }
+      chip.append(nm);
       if (p.isHost) {
         const crown = document.createElement('span');
         crown.className = 'host-badge';
@@ -204,6 +235,15 @@ function showResults(m) {
     ? mine.dnf ? t('timeUp') : t('placeBig', medals[mine.place - 1] || '', mine.place)
     : '';
 
+  // 포털 회원으로 완주한 경우에만 "점수 저장" 표시 (게스트/DNF 는 저장 안 됨)
+  const myScore = $('results-my-score');
+  if (mine && mine.portal && mine.score != null) {
+    myScore.textContent = t('portalScore', mine.score.toLocaleString());
+    myScore.classList.remove('hidden');
+  } else {
+    myScore.classList.add('hidden');
+  }
+
   const body = $('results-body');
   body.innerHTML = '';
   for (const r of m.results) {
@@ -217,7 +257,15 @@ function showResults(m) {
     const dot = document.createElement('span');
     dot.className = 'sdot';
     dot.style.cssText = `display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;background:${r.color}`;
-    tdName.append(dot, document.createTextNode(r.name));
+    tdName.append(dot);
+    if (r.avatarUrl) {
+      const av = document.createElement('img');
+      av.className = 'pavatar pavatar-sm';
+      av.src = r.avatarUrl;
+      av.alt = '';
+      tdName.append(av);
+    }
+    tdName.append(document.createTextNode(r.name));
     const tdTime = document.createElement('td');
     tdTime.className = 'rtime' + (r.dnf ? ' dnf' : '');
     tdTime.textContent = r.dnf ? t('dnf') : t('secs', (r.time / 1000).toFixed(2));

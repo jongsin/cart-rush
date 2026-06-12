@@ -100,6 +100,19 @@ input {
   background: #fffdf9;
 }
 input:focus { border-color: var(--orange); }
+input:disabled { background: #f7efe4; color: #6f6157; }
+
+/* 포털 로그인 배지 — 서버가 portalProfile 을 보내면 표시 */
+.portal-badge {
+  margin: 8px 0 2px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #e9f7ee;
+  border: 1px solid #bfe6cc;
+  color: #1d7a3f;
+  font-size: 13px;
+  display: inline-block;
+}
 
 .btn {
   width: 100%;
@@ -182,6 +195,9 @@ input:focus { border-color: var(--orange); }
 }
 .player-chip.empty { justify-content: center; color: #d8cabb; border-style: dashed; font-size: 13px; }
 .player-dot { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; }
+/* 포털 회원 아바타 (로비 칩 / 결과 테이블) */
+.pavatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: #fff; border: 1px solid #f0e4d6; }
+.pavatar-sm { width: 20px; height: 20px; vertical-align: -5px; margin-right: 6px; }
 .player-chip .pname { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .player-chip .host-badge { margin-left: auto; font-size: 14px; }
 .lobby-wait { color: #9a8c80; font-size: 14px; margin-top: 12px; }
@@ -331,6 +347,8 @@ body.touch #hud-bottom { bottom: calc(106px + env(safe-area-inset-bottom, 0px));
 }
 .results-card h2 { color: var(--orange-dark); margin-bottom: 6px; font-size: 26px; }
 #results-my-place { font-family: var(--font-display); font-size: 46px; margin: 8px 0 16px; }
+/* 포털 점수 저장 안내 (회원으로 완주한 경우만) */
+.results-score { font-size: 15px; color: #1d7a3f; margin: -8px 0 14px; }
 
 #results-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
 #results-table th {

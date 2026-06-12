@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { WebSocketServer } from 'ws';
 import { generateMap } from './mapgen.js';
+import { portalEnabled, verifyMember, submitScore, raceScore } from './portal.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -56,7 +57,8 @@ function publicPlayers(room) {
     name: p.name,
     color: p.color,
     slot: p.slot,
-    isHost: p.id === room.hostId
+    isHost: p.id === room.hostId,
+    avatarUrl: p.portal ? p.portal.avatarUrl : null
   }));
 }
 
@@ -66,7 +68,8 @@ function cleanName(raw) {
 }
 
 function joinRoom(room, player, name) {
-  player.name = cleanName(name);
+  // 포털 로그인 회원이면 포털(게임별) 닉네임이 입력값보다 우선
+  player.name = cleanName(player.portal?.nickname ?? name);
   player.color = COLORS.find((c) => ![...room.players.values()].some((p) => p.color === c)) || COLORS[0];
   player.slot = [0, 1, 2, 3].find((s) => ![...room.players.values()].some((p) => p.slot === s)) ?? 0;
   room.players.set(player.id, player);
@@ -120,16 +123,24 @@ function endGame(room, reason) {
   const rest = players
     .filter((p) => !p.finished)
     .sort((a, b) => b.itemsCount - a.itemsCount || dist(b) - dist(a));
-  const results = [...finishers, ...rest].map((p, i) => ({
-    place: i + 1,
-    id: p.id,
-    name: p.name,
-    color: p.color,
-    time: p.finishTime,
-    items: p.itemsCount,
-    total: room.map.itemTarget,
-    dnf: !p.finished
-  }));
+  const results = [...finishers, ...rest].map((p, i) => {
+    // 완주자만 포털 점수 산출 (레벨 + 순위 + 시간 보너스), DNF 는 제출 안 함
+    const score = p.finished ? raceScore(room.level, i + 1, p.finishTime, room.map.cfg.timeLimit) : null;
+    if (score !== null && p.portal) submitScore(p.portal.memberId, score);
+    return {
+      place: i + 1,
+      id: p.id,
+      name: p.name,
+      color: p.color,
+      time: p.finishTime,
+      items: p.itemsCount,
+      total: room.map.itemTarget,
+      dnf: !p.finished,
+      score,
+      portal: !!p.portal,
+      avatarUrl: p.portal ? p.portal.avatarUrl : null
+    };
+  });
   broadcast(room, 'gameEnd', { results, level: room.level, reason });
   room.level++;
   console.log(`[room ${room.code}] game end (${reason}), next level ${room.level}`);
@@ -153,7 +164,7 @@ function removePlayer(player) {
   }
 }
 
-wss.on('connection', (ws) => {
+wss.on('connection', (ws, req) => {
   const player = {
     id: playerSeq++,
     ws,
@@ -161,6 +172,7 @@ wss.on('connection', (ws) => {
     color: COLORS[0],
     slot: 0,
     room: null,
+    portal: null, // 포털 회원 프로필 { memberId, nickname, avatarUrl, ... } | null(게스트)
     progress: {},
     collected: new Set(),
     listDone: false,
@@ -172,7 +184,13 @@ wss.on('connection', (ws) => {
   ws.isAlive = true;
   ws.on('pong', () => (ws.isAlive = true));
 
-  ws.on('message', (raw) => {
+  // 같은 도메인 서브패스 서빙이라 업그레이드 요청에 포털 쿠키가 실려온다 → 회원 검증
+  player.portalReady = verifyMember(req.headers.cookie).then((profile) => {
+    player.portal = profile;
+    if (profile) send(ws, 'portalProfile', { nickname: profile.nickname, avatarUrl: profile.avatarUrl });
+  });
+
+  ws.on('message', async (raw) => {
     let msg;
     try {
       msg = JSON.parse(raw);
@@ -183,6 +201,7 @@ wss.on('connection', (ws) => {
 
     switch (msg.type) {
       case 'create': {
+        await player.portalReady; // 닉네임 결정 전에 포털 검증 완료 보장 (최대 3초)
         if (room) removePlayer(player);
         const newRoom = {
           code: makeCode(),
@@ -202,6 +221,7 @@ wss.on('connection', (ws) => {
       }
 
       case 'join': {
+        await player.portalReady;
         if (room) removePlayer(player);
         const target = rooms.get(String(msg.code ?? '').trim().toUpperCase());
         // 클라이언트가 code를 현재 언어로 번역해 보여준다
